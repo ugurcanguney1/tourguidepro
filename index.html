@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Tur Rehberi Pro</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#2563eb"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="TurRehberi"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f3ef;--surface:#ffffff;--surface2:#f8f7f3;--border:#e8e6df;--border2:#d4d1c8;
+  --text:#1a1917;--text2:#6b6860;--text3:#9c9a94;
+  --blue:#2563eb;--blue-light:#eff6ff;--blue-dark:#1d4ed8;
+  --green:#16a34a;--green-light:#dcfce7;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --red:#dc2626;--red-light:#fee2e2;
+  --purple:#9333ea;--purple-light:#f3e8ff;
+  --orange:#ea580c;--orange-light:#ffedd5;
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,0.08),0 2px 6px rgba(0,0,0,0.04);
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111110;--surface:#1c1b19;--surface2:#242320;--border:#2e2d29;--border2:#3d3c37;
+  --text:#f5f4f0;--text2:#a8a59e;--text3:#6b6860;
+  --blue:#3b82f6;--blue-light:#1e3a5f;--blue-dark:#60a5fa;
+  --green:#22c55e;--green-light:#14532d;
+  --amber:#f59e0b;--amber-light:#451a03;
+  --red:#ef4444;--red-light:#450a0a;
+  --purple:#a855f7;--purple-light:#3b0764;
+  --orange:#f97316;--orange-light:#431407;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:1rem;padding-bottom:calc(1.5rem + env(safe-area-inset-bottom));max-width:960px;margin:0 auto;font-size:14px;line-height:1.5}
+.screen{display:none}.screen.active{display:block}
+
+/* AUTH */
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:92vh;padding:1rem}
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;width:100%;max-width:380px;box-shadow:var(--shadow-md)}
+.auth-logo{width:48px;height:48px;background:var(--blue);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 1rem}
+.auth-card h1{font-size:22px;font-weight:600;text-align:center;margin-bottom:0.2rem;letter-spacing:-0.3px}
+.auth-card .sub{font-size:13px;color:var(--text2);text-align:center;margin-bottom:1.5rem}
+.auth-tabs{display:flex;background:var(--surface2);border-radius:var(--radius-sm);padding:3px;gap:3px;margin-bottom:1.25rem}
+.auth-tab{flex:1;padding:7px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text2);border:none;border-radius:6px;transition:all 0.15s;font-family:inherit}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.field{margin-bottom:12px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:500}
+.field input{width:100%;height:42px;padding:0 14px;font-size:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-family:inherit;transition:border-color 0.15s}
+.field input:focus{outline:none;border-color:var(--blue)}
+.auth-btn{width:100%;height:44px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;font-family:inherit;letter-spacing:0.1px;transition:background 0.15s}
+.auth-btn:hover{background:var(--blue-dark)}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed}
+.auth-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:16px}
+.auth-ok{color:var(--green);font-size:12px;text-align:center;margin-top:8px;min-height:16px}
+
+/* TOP BAR */
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;padding-top:0.75rem}
+.top-bar h1{font-size:18px;font-weight:600;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px}
+.top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.user-badge{font-size:12px;background:var(--blue-light);color:var(--blue);padding:4px 12px;border-radius:20px;font-weight:600}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;transition:background 0.3s}
+.sync-dot.on{background:var(--green)}
+.sync-txt{font-size:11px;color:var(--text3)}
+.icon-btn{font-size:12px;color:var(--text2);background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:4px 12px;cursor:pointer;height:30px;font-family:inherit;font-weight:500;transition:all 0.15s}
+.icon-btn:hover{background:var(--surface2);border-color:var(--border2)}
+
+/* TABS */
+.tabs{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap}
+.tab{padding:6px 14px;font-size:13px;font-weight:500;border:1.5px solid var(--border);border-radius:20px;cursor:pointer;background:var(--surface);color:var(--text2);transition:all 0.15s;font-family:inherit}
+.tab:hover{border-color:var(--border2);color:var(--text)}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* STATUS */
+.status{font-size:12px;padding:8px 14px;border-radius:var(--radius-sm);margin-bottom:1rem;display:none;font-weight:500}
+.status.show{display:block}
+.status.ok{background:var(--green-light);color:var(--green)}
+.status.err{background:var(--red-light);color:var(--red)}
+.status.info{background:var(--blue-light);color:var(--blue)}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:8px}
+input,select,textarea{font-family:'DM Sans',system-ui,sans-serif}
+input,select{width:100%;height:40px;padding:0 12px;font-size:13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);transition:border-color 0.15s}
+input:focus,select:focus{outline:none;border-color:var(--blue)}
+textarea{width:100%;padding:10px 12px;font-size:13px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);resize:vertical;min-height:80px;transition:border-color 0.15s}
+textarea:focus{outline:none;border-color:var(--blue)}
+button{height:36px;padding:0 16px;font-size:13px;font-weight:500;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);cursor:pointer;font-family:inherit;transition:all 0.15s}
+button:hover{background:var(--surface2)}
+.add-btn{background:var(--blue);color:#fff;border-color:var(--blue)}
+.add-btn:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
+.add-btn:disabled{opacity:0.5;cursor:not-allowed}
+.save-btn{background:var(--blue);color:#fff;border-color:var(--blue)}
+.save-btn:hover{background:var(--blue-dark)}
+.cancel-btn{background:var(--surface);color:var(--text2)}
+.section-title{font-size:13px;font-weight:600;margin:1.25rem 0 0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px}
+
+/* STATS */
+.stats-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:1.25rem 0}
+.stats-4{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:1.25rem 0}
+.stat-card{border-radius:var(--radius);padding:14px 16px;position:relative;overflow:hidden}
+.stat-card.default{background:var(--surface);border:1.5px solid var(--border)}
+.stat-card.green{background:var(--green-light);border:1.5px solid var(--green)}
+.stat-card.blue{background:var(--blue-light);border:1.5px solid var(--blue)}
+.stat-card.amber{background:var(--amber-light);border:1.5px solid var(--amber)}
+.stat-card.red{background:var(--red-light);border:1.5px solid var(--red)}
+.stat-card.purple{background:var(--purple-light);border:1.5px solid var(--purple)}
+.stat-card.orange{background:var(--orange-light);border:1.5px solid var(--orange)}
+.stat-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px}
+.stat-val{font-size:20px;font-weight:600;letter-spacing:-0.5px;line-height:1.2}
+.stat-card.green .stat-val{color:var(--green)}
+.stat-card.blue .stat-val{color:var(--blue)}
+.stat-card.amber .stat-val{color:var(--amber)}
+.stat-card.red .stat-val{color:var(--red)}
+.stat-card.purple .stat-val{color:var(--purple)}
+.stat-card.orange .stat-val{color:var(--orange)}
+
+/* CALENDAR */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-title{font-size:15px;font-weight:600;letter-spacing:-0.2px}
+.cal-nav{display:flex;gap:6px}
+.cal-nav button{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px;border-radius:var(--radius-sm)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.day-label{text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:5px 0;letter-spacing:0.3px}
+.day-cell{border-radius:var(--radius-sm);padding:5px 4px;min-height:56px;border:1.5px solid var(--border);font-size:11px;background:var(--surface);transition:border-color 0.15s}
+.day-cell:hover:not(.empty){border-color:var(--border2)}
+.day-cell.empty{border-color:transparent;background:transparent}
+.day-cell.today{border-color:var(--blue);background:var(--blue-light)}
+.day-cell.has-tour{background:var(--surface2)}
+.day-cell.selected-day{border-color:var(--blue);border-width:2px;background:var(--blue-light)}
+.day-num{font-size:12px;font-weight:600;margin-bottom:3px;color:var(--text)}
+.day-cell.today .day-num{color:var(--blue)}
+.tour-dot{font-size:9px;padding:1px 4px;border-radius:4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-weight:500;display:block;width:100%}
+
+/* TOUR ITEM */
+.tour-item{border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow);transition:box-shadow 0.15s}
+.tour-item:hover{box-shadow:var(--shadow-md)}
+.tour-item-header{display:flex;align-items:flex-start;gap:12px;padding:12px 14px}
+.tour-color-bar{width:4px;border-radius:4px;align-self:stretch;flex-shrink:0;min-height:20px}
+.tour-info{flex:1;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tour-name{font-weight:600;font-size:14px;letter-spacing:-0.1px;width:100%}
+.tour-meta{color:var(--text2);font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:20px;border:1px solid var(--border)}
+.tour-content{color:var(--text2);font-size:12px;width:100%;line-height:1.6;padding-top:2px}
+.item-actions{display:flex;gap:4px;flex-shrink:0}
+.edit-btn{width:28px;height:28px;padding:0;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);transition:all 0.15s}
+.edit-btn:hover{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+.del-btn{width:28px;height:28px;padding:0;border:none;background:none;color:var(--text3);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);transition:all 0.15s}
+.del-btn:hover{background:var(--red-light);color:var(--red)}
+
+/* PAYMENT TOGGLES */
+.payment-bar{display:flex;gap:6px;padding:10px 14px;border-top:1.5px solid var(--border);flex-wrap:wrap;align-items:center;background:var(--surface2)}
+.pay-toggle{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);user-select:none;transition:all 0.15s;flex-shrink:0;line-height:1;white-space:nowrap;font-family:inherit}
+.pay-toggle:hover{border-color:var(--border2);color:var(--text)}
+.pay-toggle.active-pay{border-color:var(--green);background:var(--green-light);color:var(--green)}
+.pay-toggle.active-com{border-color:var(--orange);background:var(--orange-light);color:var(--orange)}
+.pay-toggle .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* INCOME */
+.income-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:8px;background:var(--surface);box-shadow:var(--shadow)}
+.income-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.income-info{flex:1;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.income-amount{font-weight:600;font-size:15px;letter-spacing:-0.2px}
+.income-meta{color:var(--text2);font-size:12px}
+.income-tour{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;background:var(--blue-light);color:var(--blue)}
+
+/* MONTHLY */
+.month-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:8px;box-shadow:var(--shadow)}
+.month-title{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text);letter-spacing:-0.1px}
+.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.month-stat{text-align:center;background:var(--surface2);border-radius:var(--radius-sm);padding:8px;border:1px solid var(--border)}
+.month-stat-label{font-size:10px;font-weight:600;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.3px}
+.month-stat-val{font-size:13px;font-weight:600}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;backdrop-filter:blur(2px)}
+.modal{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-md)}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:1rem;letter-spacing:-0.2px}
+.modal-actions{display:flex;gap:8px;margin-top:1rem;justify-content:flex-end}
+
+/* PROFILE */
+.profile-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.profile-card h2{font-size:15px;font-weight:600;margin-bottom:1rem;letter-spacing:-0.2px}
+
+/* INSTALL */
+.install-banner{background:var(--blue-light);border:1.5px solid var(--blue);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:1rem;font-size:13px;color:var(--blue)}
+.install-banner button{background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;height:auto;flex-shrink:0;font-family:inherit}
+.install-banner .close-x{background:none;border:none;color:var(--blue);font-size:18px;cursor:pointer;padding:0;height:auto;min-width:0;opacity:0.6}
+.empty-msg{color:var(--text3);font-size:13px;text-align:center;padding:2rem 0}
+
+@media(max-width:500px){.form-grid{grid-template-columns:1fr 1fr}.top-bar h1{font-size:16px}.stats-4{grid-template-columns:repeat(2,1fr)}}
+
+/* CURRENCY WIDGET */
+.currency-widget{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:1rem;box-shadow:var(--shadow)}
+.currency-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px}
+.currency-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.currency-row{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;display:flex;justify-content:space-between;align-items:center}
+.currency-pair{font-size:12px;font-weight:600;color:var(--text2)}
+.currency-rate{font-size:14px;font-weight:600;color:var(--text)}
+.currency-updated{font-size:11px;color:var(--text3);margin-top:8px;text-align:right}
+.currency-input-row{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.currency-input-row input{width:100px;height:34px;flex-shrink:0}
+.currency-input-row select{width:80px;height:34px;flex-shrink:0}
+.currency-result{font-size:15px;font-weight:600;color:var(--blue);margin-left:4px}
+
+/* YEAR SELECTOR */
+.year-selector{display:flex;align-items:center;gap:8px;margin-bottom:1rem}
+.year-selector button{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;font-size:16px;border-radius:var(--radius-sm);flex-shrink:0}
+.year-label{font-size:16px;font-weight:600;letter-spacing:-0.3px;min-width:60px;text-align:center}
+.year-all-btn{font-size:12px;padding:4px 12px;border-radius:20px;height:28px;color:var(--text2)}
+.year-all-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* SELECTED TOUR DETAIL */
+.selected-tour-detail{margin-top:10px;margin-bottom:0;animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.selected-tour-detail .detail-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.selected-tour-detail .detail-title{font-size:15px;font-weight:600;flex:1}
+.selected-tour-detail .detail-close{width:24px;height:24px;padding:0;border:none;background:none;color:var(--text3);font-size:18px;cursor:pointer;border-radius:4px}
+.selected-tour-detail .detail-close:hover{background:var(--red-light);color:var(--red)}
+.detail-meta-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px;align-items:center}
+.detail-content{font-size:13px;color:var(--text2);line-height:1.6;margin-top:6px}
+
+/* PENDING MODAL */
+.pending-list{margin-top:12px;display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto}
+.pending-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm)}
+.pending-item-info{flex:1}
+.pending-item-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.pending-item-meta{font-size:12px;color:var(--text2)}
+.pending-item-price{font-size:13px;font-weight:600;color:var(--red);flex-shrink:0}
+.pending-item .pay-toggle{border-color:var(--green);color:var(--green);background:var(--green-light)}
+.pending-item .pay-toggle:hover{background:var(--green);color:#fff}
+.stat-card.clickable{cursor:pointer;transition:all 0.15s}
+.stat-card.clickable:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+</style>
+</head>
+<body>
+
+<div class="install-banner" id="install-banner" style="display:none">
+  <span>📱 Ana ekrana ekleyerek uygulama gibi kullan!</span>
+  <button onclick="triggerInstall()">Ekle</button>
+  <button class="close-x" onclick="document.getElementById('install-banner').style.display='none'">×</button>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal" style="display:none">
+  <div class="modal">
+    <h2>Turu Düzenle</h2>
+    <div class="form-grid">
+      <input id="e-name" placeholder="Tur adı"/>
+      <input id="e-start" type="date"/>
+      <input id="e-end" type="date"/>
+      <input id="e-pax" type="number" placeholder="Kişi sayısı" min="1"/>
+      <input id="e-price" type="number" placeholder="Fiyat"/>
+      <select id="e-currency"><option>EUR</option><option>USD</option><option>GBP</option><option>TRY</option></select>
+    </div>
+    <textarea id="e-content" placeholder="Tur içeriği" style="margin-bottom:8px"></textarea>
+    <input id="e-notes" placeholder="Notlar"/>
+    <div class="modal-actions">
+      <button class="cancel-btn" onclick="closeModal()">İptal</button>
+      <button class="save-btn" id="save-edit-btn" onclick="saveEdit()">Kaydet</button>
+    </div>
+    <div class="auth-err" id="edit-err" style="margin-top:8px"></div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">🗺️</div>
+      <h1>Tur Rehberi Pro</h1>
+      <p class="sub">Türkiye'nin tur rehberi platformu</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuth('login')">Giriş Yap</button>
+        <button class="auth-tab" onclick="switchAuth('register')">Kayıt Ol</button>
+      </div>
+      <div id="auth-login">
+        <div class="field"><label>E-posta</label><input id="l-email" type="email" placeholder="ornek@mail.com"/></div>
+        <div class="field"><label>Şifre</label><input id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+        <button class="auth-btn" id="login-btn" onclick="doLogin()">Giriş Yap</button>
+        <div class="auth-err" id="login-err"></div>
+      </div>
+      <div id="auth-register" style="display:none">
+        <div class="field"><label>Ad Soyad</label><input id="r-name" type="text" placeholder="Adınız Soyadınız"/></div>
+        <div class="field"><label>Şehir</label><input id="r-city" type="text" placeholder="İstanbul"/></div>
+        <div class="field"><label>E-posta</label><input id="r-email" type="email" placeholder="ornek@mail.com"/></div>
+        <div class="field"><label>Şifre</label><input id="r-pass" type="password" placeholder="En az 6 karakter" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+        <button class="auth-btn" id="register-btn" onclick="doRegister()">Kayıt Ol</button>
+        <div class="auth-err" id="register-err"></div>
+        <div class="auth-ok" id="register-ok"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app" class="screen">
+  <div class="top-bar">
+    <h1>🗺️ Tur Rehberi Pro</h1>
+    <div class="top-right">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span class="sync-txt" id="sync-txt">Bağlanıyor...</span>
+      <span class="user-badge" id="user-badge">...</span>
+      <button class="icon-btn" onclick="showScreen('profile')">Profil</button>
+      <button class="icon-btn" onclick="doLogout()">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" id="tab-tours" onclick="switchTab('tours')">🗓 Turlarım</div>
+    <div class="tab" id="tab-add" onclick="switchTab('add')">+ Tur Ekle</div>
+    <div class="tab" id="tab-tips" onclick="switchTab('tips')">💰 Bahşişler</div>
+    <div class="tab" id="tab-commissions" onclick="switchTab('commissions')">🤝 Komisyonlar</div>
+    <div class="tab" id="tab-summary" onclick="switchTab('summary')">📊 Özet</div>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <!-- TOURS -->
+  <div id="section-tours">
+<div class="stats-2">
+      <div class="stat-card default"><div class="stat-label">Toplam Tur</div><div class="stat-val" id="st-tours">0</div></div>
+      <div class="stat-card blue"><div class="stat-label">Dolu Gün</div><div class="stat-val" id="st-days">0</div></div>
+    </div>
+    <div class="cal-header">
+      <div class="cal-title" id="cal-title"></div>
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <button onclick="changeMonth(1)">›</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div id="selected-tour-detail" style="display:none"></div>
+    <div class="section-title" style="margin-top:1.5rem;display:flex;align-items:center;justify-content:space-between">
+      <span>Turlarım</span>
+      <div style="display:flex;gap:6px">
+        <button class="tab active" id="tours-view-all" style="padding:3px 10px;font-size:11px;border-radius:20px" onclick="setToursView('all')">Tümü</button>
+        <button class="tab" id="tours-view-month" style="padding:3px 10px;font-size:11px;border-radius:20px" onclick="setToursView('month')">Bu Ay</button>
+        <button class="tab" id="tours-view-year" style="padding:3px 10px;font-size:11px;border-radius:20px" onclick="setToursView('year')">Bu Yıl</button>
+      </div>
+    </div>
+    <div id="tours-list"></div>
+  </div>
+
+  <!-- ADD -->
+  <div id="section-add" style="display:none">
+    <div class="section-title">Yeni Tur Ekle</div>
+    <div class="form-grid">
+      <input id="f-name" placeholder="Tur adı"/>
+      <input id="f-start" type="date" onchange="onStartDateChange()"/>
+      <input id="f-end" type="date"/>
+      <input id="f-pax" type="number" placeholder="Kişi sayısı" min="1"/>
+      <input id="f-price" type="number" placeholder="Fiyat"/>
+      <select id="f-currency"><option>EUR</option><option>USD</option><option>GBP</option><option>TRY</option></select>
+    </div>
+    <textarea id="f-content" placeholder="Tur içeriği (güzergah, aktiviteler, detaylar...)" style="margin-bottom:8px"></textarea>
+    <input id="f-notes" placeholder="Notlar" style="margin-bottom:8px"/>
+    <button class="add-btn" id="add-btn" onclick="addTour()">+ Tur Ekle</button>
+  </div>
+
+  <!-- TIPS -->
+  <div id="section-tips" style="display:none">
+    <div class="section-title">Bahşiş Ekle</div>
+    <div class="form-grid">
+      <input id="t-amount" type="number" placeholder="Miktar" min="0" step="0.01"/>
+      <select id="t-currency"><option>EUR</option><option>USD</option><option>GBP</option><option>TRY</option></select>
+      <select id="t-tour" ><option value="">Tura bağla (opsiyonel)</option></select>
+      
+    </div>
+    <input id="t-note" placeholder="Not" style="margin-bottom:8px"/>
+    <button class="add-btn" id="add-tip-btn" onclick="addTip()">+ Bahşiş Ekle</button>
+    <div class="section-title">Bahşişlerim</div>
+    <div id="tips-list"></div>
+  </div>
+
+  <!-- COMMISSIONS -->
+  <div id="section-commissions" style="display:none">
+    <div class="section-title">Komisyon Ekle</div>
+    <div class="form-grid">
+      <input id="c-amount" type="number" placeholder="Miktar" min="0" step="0.01"/>
+      <select id="c-currency"><option>EUR</option><option>USD</option><option>GBP</option><option>TRY</option></select>
+      <select id="c-tour" ><option value="">Tura bağla (opsiyonel)</option></select>
+       
+      <input id="c-source" placeholder="Kaynak (restoran, otel...)"/>
+    </div>
+    <input id="c-note" placeholder="Not" style="margin-bottom:8px"/>
+    <button class="add-btn" id="add-com-btn" onclick="addCommission()">+ Komisyon Ekle</button>
+    <div class="section-title">Komisyonlarım</div>
+    <div id="commissions-list"></div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="section-summary" style="display:none">
+    <div class="year-selector">
+      <button onclick="changeYear(-1)">‹</button>
+      <div class="year-label" id="year-label">2026</div>
+      <button onclick="changeYear(1)">›</button>
+      <button class="year-all-btn" id="year-all-btn" onclick="toggleAllYears()">Tümü</button>
+    </div>
+    <div class="section-title">Genel Özet</div>
+    <div id="summary-stats"></div>
+    <div class="section-title">Döviz Kurları</div>
+    <div class="currency-widget">
+      <div class="currency-grid" id="currency-grid"><div class="weather-loading">Kurlar yükleniyor...</div></div>
+      <div class="currency-updated" id="currency-updated"></div>
+      <div class="currency-input-row">
+        <input id="conv-amount" type="number" placeholder="Miktar" value="100"/>
+        <select id="conv-from"><option>EUR</option><option>USD</option><option>GBP</option><option>TRY</option></select>
+        <span style="color:var(--text2);font-weight:500">→</span>
+        <select id="conv-to"><option value="TRY">TRY</option><option>EUR</option><option>USD</option><option>GBP</option></select>
+        <span class="currency-result" id="conv-result">—</span>
+      </div>
+    </div>
+    <div class="section-title">Aylık Özet</div>
+    <div id="monthly-list"></div>
+  </div>
+</div>
+
+
+<!-- PENDING MODAL -->
+<div class="modal-overlay" id="pending-modal" style="display:none">
+  <div class="modal">
+    <h2 id="pending-modal-title">Bekleyen Ödemeler</h2>
+    <div class="pending-list" id="pending-modal-list"></div>
+    <div class="modal-actions">
+      <button class="save-btn" onclick="document.getElementById('pending-modal').style.display='none'">Kapat</button>
+    </div>
+  </div>
+</div>
+<!-- PROFILE -->
+<div id="screen-profile" class="screen">
+  <div class="top-bar"><h1>Profilim</h1><button class="icon-btn" onclick="showScreen('app')">← Geri</button></div>
+  <div class="profile-card">
+    <h2>Bilgilerimi Güncelle</h2>
+    <div class="field"><label>Ad Soyad</label><input id="p-name" placeholder="Adınız Soyadınız"/></div>
+    <div class="field"><label>Şehir</label><input id="p-city" placeholder="İstanbul"/></div>
+    <button class="save-btn" onclick="saveProfile()">Kaydet</button>
+    <div class="auth-ok" id="profile-ok"></div><div class="auth-err" id="profile-err"></div>
+  </div>
+  <div class="profile-card">
+    <h2>Şifre Değiştir</h2>
+    <div class="field"><label>Yeni Şifre</label><input id="p-pass" type="password" placeholder="En az 6 karakter"/></div>
+    <button class="save-btn" onclick="changePassword()">Şifreyi Güncelle</button>
+    <div class="auth-ok" id="pass-ok"></div><div class="auth-err" id="pass-err"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL='https://rokglwozupzjhxacdpvf.supabase.co';
+const SUPABASE_KEY='sb_publishable_mtjSzV7MGejRUfbzgvNr1w_5MinC3ne';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const COLORS=['#2563eb','#16a34a','#dc2626','#9333ea','#ea580c','#0891b2','#ca8a04','#db2777','#0d9488','#7c3aed'];
+let currentUser=null,myTours=[],myTips=[],myCommissions=[],activeTab='tours',viewYear,viewMonth,editingId=null,selectedYear=new Date().getFullYear(),showAllYears=false,selectedTourId=null,cachedFilteredTours=[],toursView='all';
+const today=new Date();
+viewYear=today.getFullYear();viewMonth=today.getMonth();
+
+// PWA
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').style.display='flex';});
+function triggerInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;}document.getElementById('install-banner').style.display='none';}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+
+function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+n).classList.add('active');}
+function switchAuth(tab){
+  document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('auth-register').style.display=tab==='register'?'block':'none';
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(tab==='login'&&i===0)||(tab==='register'&&i===1)));
+}
+
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim(),pass=document.getElementById('l-pass').value;
+  document.getElementById('login-err').textContent='';
+  const btn=document.getElementById('login-btn');btn.disabled=true;btn.textContent='Giriş yapılıyor...';
+  const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
+  btn.disabled=false;btn.textContent='Giriş Yap';
+  if(error){document.getElementById('login-err').textContent='E-posta veya şifre hatalı.';return;}
+  currentUser=data.user;await loadProfile();startApp();
+}
+
+async function doRegister(){
+  const name=document.getElementById('r-name').value.trim(),city=document.getElementById('r-city').value.trim();
+  const email=document.getElementById('r-email').value.trim(),pass=document.getElementById('r-pass').value;
+  document.getElementById('register-err').textContent='';document.getElementById('register-ok').textContent='';
+  if(!name||!email||!pass){document.getElementById('register-err').textContent='Tüm alanları doldurun.';return;}
+  if(pass.length<6){document.getElementById('register-err').textContent='Şifre en az 6 karakter olmalı.';return;}
+  const btn=document.getElementById('register-btn');btn.disabled=true;btn.textContent='Kaydediliyor...';
+  const {data,error}=await sb.auth.signUp({email,password:pass});
+  btn.disabled=false;btn.textContent='Kayıt Ol';
+  if(error){document.getElementById('register-err').textContent=error.message;return;}
+  if(data.user){
+    await sb.from('profiles').insert([{id:data.user.id,display_name:name,city:city||null}]);
+    currentUser=data.user;await loadProfile();startApp();
+  } else {
+    document.getElementById('register-ok').textContent='Kayıt başarılı! Giriş yapabilirsiniz.';switchAuth('login');
+  }
+}
+
+async function doLogout(){await sb.auth.signOut();currentUser=null;myTours=[];myTips=[];myCommissions=[];showScreen('auth');}
+
+async function loadProfile(){
+  if(!currentUser)return;
+  const {data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(data){document.getElementById('user-badge').textContent=data.display_name;document.getElementById('p-name').value=data.display_name||'';document.getElementById('p-city').value=data.city||'';}
+}
+
+async function saveProfile(){
+  const name=document.getElementById('p-name').value.trim(),city=document.getElementById('p-city').value.trim();
+  document.getElementById('profile-ok').textContent='';document.getElementById('profile-err').textContent='';
+  if(!name){document.getElementById('profile-err').textContent='Ad soyad boş olamaz.';return;}
+  const {error}=await sb.from('profiles').upsert([{id:currentUser.id,display_name:name,city}]);
+  if(error){document.getElementById('profile-err').textContent='Hata: '+error.message;return;}
+  document.getElementById('user-badge').textContent=name;document.getElementById('profile-ok').textContent='Profil güncellendi!';
+}
+
+async function changePassword(){
+  const pass=document.getElementById('p-pass').value;
+  document.getElementById('pass-ok').textContent='';document.getElementById('pass-err').textContent='';
+  if(pass.length<6){document.getElementById('pass-err').textContent='Şifre en az 6 karakter olmalı.';return;}
+  const {error}=await sb.auth.updateUser({password:pass});
+  if(error){document.getElementById('pass-err').textContent='Hata: '+error.message;return;}
+  document.getElementById('pass-ok').textContent='Şifre güncellendi!';document.getElementById('p-pass').value='';
+}
+
+function startApp(){
+  showScreen('app');loadAll();loadCurrency();
+  sb.channel('my-data')
+    .on('postgres_changes',{event:'*',schema:'public',table:'tours',filter:`user_id=eq.${currentUser.id}`},()=>loadAll())
+    .on('postgres_changes',{event:'*',schema:'public',table:'tips',filter:`user_id=eq.${currentUser.id}`},()=>loadAll())
+    .on('postgres_changes',{event:'*',schema:'public',table:'commissions',filter:`user_id=eq.${currentUser.id}`},()=>loadAll())
+    .subscribe();
+}
+
+async function loadAll(){
+  const [t,ti,co]=await Promise.all([
+    sb.from('tours').select('*').eq('user_id',currentUser.id).order('start_date',{ascending:true}),
+    sb.from('tips').select('*').eq('user_id',currentUser.id).order('date',{ascending:false}),
+    sb.from('commissions').select('*').eq('user_id',currentUser.id).order('date',{ascending:false})
+  ]);
+  if(t.error||ti.error||co.error){setSynced(false);return;}
+  myTours=t.data.map(r=>({id:r.id,name:r.name,start:r.start_date,end:r.end_date,pax:r.pax||0,price:r.price||0,currency:r.currency||'EUR',location:r.location||'',notes:r.notes||'',color:r.color||COLORS[0],payment_received:r.payment_received||false,commission_received:r.commission_received||false}));
+  myTips=ti.data;myCommissions=co.data.map(c=>({...c,received:c.received||false}));
+  setSynced(true);updateTourSelects();render();
+}
+
+function updateTourSelects(){
+  ['t-tour','c-tour'].forEach(sid=>{
+    const sel=document.getElementById(sid),val=sel.value;
+    sel.innerHTML='<option value="">Tura bağla (opsiyonel)</option>';
+    myTours.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.name+' ('+fmtDate(parseDate(t.start))+')';sel.appendChild(o);});
+    sel.value=val;
+  });
+}
+
+// Auto-fill date when tour selected
+
+// TOURS
+async function addTour(){
+  const name=document.getElementById('f-name').value.trim(),start=document.getElementById('f-start').value,end=document.getElementById('f-end').value;
+  const pax=parseInt(document.getElementById('f-pax').value)||0,price=parseFloat(document.getElementById('f-price').value)||0;
+  const currency=document.getElementById('f-currency').value,content=document.getElementById('f-content').value.trim(),notes=document.getElementById('f-notes').value.trim();
+  if(!name||!start||!end){showStatus('Tur adı, başlangıç ve bitiş tarihi zorunludur.','err');return;}
+  if(start>end){showStatus('Başlangıç tarihi bitiş tarihinden önce olmalıdır.','err');return;}
+  const btn=document.getElementById('add-btn');btn.disabled=true;btn.textContent='Kaydediliyor...';
+  const {error}=await sb.from('tours').insert([{id:Date.now(),name,start_date:start,end_date:end,pax,price,currency,location:content,notes,color:COLORS[myTours.length%COLORS.length],user_id:currentUser.id}]);
+  btn.disabled=false;btn.textContent='+ Tur Ekle';
+  if(error){showStatus('Hata: '+error.message,'err');return;}
+  showStatus('Tur eklendi!','ok');
+  ['f-name','f-start','f-end','f-pax','f-price','f-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-content').value='';
+  switchTab('tours');await loadAll();
+}
+
+function openEditModal(id){
+  const t=myTours.find(x=>x.id===id);if(!t)return;
+  editingId=id;
+  document.getElementById('e-name').value=t.name;document.getElementById('e-start').value=t.start;
+  document.getElementById('e-end').value=t.end;document.getElementById('e-pax').value=t.pax||'';
+  document.getElementById('e-price').value=t.price||'';document.getElementById('e-currency').value=t.currency||'EUR';
+  document.getElementById('e-content').value=t.location||'';document.getElementById('e-notes').value=t.notes||'';
+  document.getElementById('edit-err').textContent='';document.getElementById('edit-modal').style.display='flex';
+}
+function closeModal(){document.getElementById('edit-modal').style.display='none';editingId=null;}
+
+async function saveEdit(){
+  const name=document.getElementById('e-name').value.trim(),start=document.getElementById('e-start').value,end=document.getElementById('e-end').value;
+  const pax=parseInt(document.getElementById('e-pax').value)||0,price=parseFloat(document.getElementById('e-price').value)||0;
+  const currency=document.getElementById('e-currency').value,content=document.getElementById('e-content').value.trim(),notes=document.getElementById('e-notes').value.trim();
+  if(!name||!start||!end){document.getElementById('edit-err').textContent='Zorunlu alanlar eksik.';return;}
+  if(start>end){document.getElementById('edit-err').textContent='Başlangıç tarihi bitiş tarihinden önce olmalıdır.';return;}
+  const btn=document.getElementById('save-edit-btn');btn.disabled=true;btn.textContent='Kaydediliyor...';
+  const {error}=await sb.from('tours').update({name,start_date:start,end_date:end,pax,price,currency,location:content,notes}).eq('id',editingId).eq('user_id',currentUser.id);
+  btn.disabled=false;btn.textContent='Kaydet';
+  if(error){document.getElementById('edit-err').textContent='Hata: '+error.message;return;}
+  closeModal();showStatus('Tur güncellendi!','ok');await loadAll();
+}
+
+async function deleteTour(id){
+  if(!confirm('Bu turu silmek istediğinize emin misiniz?'))return;
+  await sb.from('tours').delete().eq('id',id).eq('user_id',currentUser.id);
+  showStatus('Tur silindi.','ok');await loadAll();
+}
+
+async function togglePayment(id,field){
+  const t=myTours.find(x=>x.id===id);if(!t)return;
+  const newVal=!t[field];
+  const {error}=await sb.from('tours').update({[field]:newVal}).eq('id',id).eq('user_id',currentUser.id);
+  if(error){showStatus('Hata: '+error.message,'err');return;}
+  t[field]=newVal;
+  renderTours();
+  renderTourDetail();
+  renderSummary();
+}
+
+// TIPS
+async function addTip(){
+  const amount=parseFloat(document.getElementById('t-amount').value),currency=document.getElementById('t-currency').value;
+  const tourId=document.getElementById('t-tour').value,note=document.getElementById('t-note').value.trim();
+  if(!amount){showStatus('Miktar zorunludur.','err');return;}
+  
+  const finalDate=tourId?myTours.find(t=>t.id==tourId)?.start:new Date().toISOString().slice(0,10);
+  const tourName=tourId?myTours.find(t=>t.id==tourId)?.name||'':'';
+  const btn=document.getElementById('add-tip-btn');btn.disabled=true;btn.textContent='Kaydediliyor...';
+  const {error}=await sb.from('tips').insert([{id:Date.now(),user_id:currentUser.id,amount,currency,date:finalDate,note,tour_id:tourId||null,tour_name:tourName}]);
+  btn.disabled=false;btn.textContent='+ Bahşiş Ekle';
+  if(error){showStatus('Hata: '+error.message,'err');return;}
+  showStatus('Bahşiş eklendi!','ok');
+  ['t-amount','t-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('t-tour').value='';
+  await loadAll();
+}
+
+async function deleteTip(id){await sb.from('tips').delete().eq('id',id).eq('user_id',currentUser.id);await loadAll();}
+
+// COMMISSIONS
+async function addCommission(){
+  const amount=parseFloat(document.getElementById('c-amount').value),currency=document.getElementById('c-currency').value;
+  const tourId=document.getElementById('c-tour').value;
+  const source=document.getElementById('c-source').value.trim(),note=document.getElementById('c-note').value.trim();
+  if(!amount){showStatus('Miktar zorunludur.','err');return;}
+  
+  const finalDate=tourId?myTours.find(t=>t.id==tourId)?.start:new Date().toISOString().slice(0,10);
+  const tourName=tourId?myTours.find(t=>t.id==tourId)?.name||'':'';
+  const btn=document.getElementById('add-com-btn');btn.disabled=true;btn.textContent='Kaydediliyor...';
+  const {error}=await sb.from('commissions').insert([{id:Date.now(),user_id:currentUser.id,amount,currency,date:finalDate,note,source,tour_id:tourId||null,tour_name:tourName}]);
+  btn.disabled=false;btn.textContent='+ Komisyon Ekle';
+  if(error){showStatus('Hata: '+error.message,'err');return;}
+  showStatus('Komisyon eklendi!','ok');
+  ['c-amount','c-source','c-note'].forEach(id=>document.getElementById(id).value='');document.getElementById('c-tour').value='';
+  await loadAll();
+}
+
+async function deleteCommission(id){await sb.from('commissions').delete().eq('id',id).eq('user_id',currentUser.id);await loadAll();}
+
+// TABS
+function switchTab(tab){
+  activeTab=tab;
+  ['tours','add','tips','commissions','summary'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);if(el)el.className='tab'+(t===tab?' active':'');
+    const sec=document.getElementById('section-'+t);if(sec)sec.style.display=t===tab?'block':'none';
+    if(tab==='summary')loadCurrency();
+  });
+}
+
+// HELPERS
+function getDates(t){const dates=[];let d=parseDate(t.start);const end=parseDate(t.end);while(d<=end){dates.push(d.toISOString().slice(0,10));d=new Date(d.getTime()+86400000);}return dates;}
+function pad(n){return String(n).padStart(2,'0')}
+function fmtDate(d){return `${d.getDate()}.${pad(d.getMonth()+1)}.${d.getFullYear()}`}
+function fmtAmt(a,c){return parseFloat(a).toFixed(2)+' '+c}
+function setSynced(ok){document.getElementById('sync-dot').className='sync-dot'+(ok?' on':'');document.getElementById('sync-txt').textContent=ok?'Senkronize':'Bağlantı hatası';}
+function showStatus(msg,type='info'){const el=document.getElementById('status');el.textContent=msg;el.className=`status show ${type}`;if(type!=='err')setTimeout(()=>{el.className='status'},3000);}
+function changeMonth(dir){viewMonth+=dir;if(viewMonth>11){viewMonth=0;viewYear++;}if(viewMonth<0){viewMonth=11;viewYear--;}renderCalendar();}
+
+// RENDER CALENDAR
+function renderCalendar(){
+  const months=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  document.getElementById('cal-title').textContent=months[viewMonth]+' '+viewYear;
+  const grid=document.getElementById('cal-grid');grid.innerHTML='';
+  ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'].forEach(d=>{const el=document.createElement('div');el.className='day-label';el.textContent=d;grid.appendChild(el);});
+  const firstDay=new Date(viewYear,viewMonth,1);let startDow=firstDay.getDay();startDow=(startDow===0?6:startDow-1);
+  const daysInMonth=new Date(viewYear,viewMonth+1,0).getDate();
+  for(let i=0;i<startDow;i++){const e=document.createElement('div');e.className='day-cell empty';grid.appendChild(e);}
+  const dateMap={};myTours.forEach(t=>{getDates(t).forEach(dt=>{if(!dateMap[dt])dateMap[dt]=[];dateMap[dt].push(t);});});
+  const todayStr=today.toISOString().slice(0,10);
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=`${viewYear}-${pad(viewMonth+1)}-${pad(day)}`;
+    const toursOnDay=dateMap[dateStr]||[];
+    const isSelected=toursOnDay.some(t=>t.id===selectedTourId);
+    const cell=document.createElement('div');
+    cell.className='day-cell'+(dateStr===todayStr?' today':'')+(toursOnDay.length?' has-tour':'')+(isSelected?' selected-day':'');
+    if(toursOnDay.length)cell.style.cursor='pointer';
+    const num=document.createElement('div');num.className='day-num';num.textContent=day;cell.appendChild(num);
+    if(toursOnDay.length){
+      toursOnDay.forEach(t=>{
+        const dot=document.createElement('div');dot.className='tour-dot';
+        dot.style.background=t.color+'22';dot.style.color=t.color;
+        dot.style.border=`0.5px solid ${t.color}55`;dot.textContent=t.name;
+        cell.appendChild(dot);
+      });
+      cell.addEventListener('click',()=>selectTourFromCalendar(toursOnDay[0].id));
+    }
+    grid.appendChild(cell);
+  }
+}
+
+function selectTourFromCalendar(id){
+  selectedTourId=(selectedTourId===id)?null:id;
+  renderCalendar();
+  renderTourDetail();
+  if(selectedTourId){
+    setTimeout(()=>{
+      const el=document.getElementById('selected-tour-detail');
+      if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});
+    },50);
+  }
+}
+
+function renderTourDetail(){
+  const el=document.getElementById('selected-tour-detail');
+  if(!el)return;
+  if(!selectedTourId){el.style.display='none';return;}
+  const t=myTours.find(x=>x.id===selectedTourId);
+  if(!t){el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML=`
+    <div class="tour-item" style="margin-bottom:0;border-color:var(--blue);border-width:2px">
+      <div class="tour-item-header">
+        <div class="tour-color-bar" style="background:${t.color}"></div>
+        <div class="tour-info">
+          <span class="tour-name">${t.name}</span>
+          <span class="tour-meta">${fmtDate(parseDate(t.start))} → ${fmtDate(parseDate(t.end))}</span>
+          ${t.pax?`<span class="tour-meta">${t.pax} kişi</span>`:''}
+          ${t.price?`<span class="tour-meta">${t.price} ${t.currency}</span>`:''}
+          ${t.location?`<span class="tour-content">${t.location}</span>`:''}
+          ${t.notes?`<span class="tour-meta">${t.notes}</span>`:''}
+        </div>
+        <div class="item-actions">
+          <button class="edit-btn" onclick="openEditModal(${t.id})">✏️</button>
+          <button class="del-btn" onclick="selectTourFromCalendar(${t.id})">×</button>
+        </div>
+      </div>
+      <div class="payment-bar">
+        <div class="pay-toggle ${t.payment_received?'active-pay':''}" onclick="togglePayment(${t.id},'payment_received')">
+          <span class="dot"></span> ${t.payment_received?'✓ Tur ödemesi alındı':'Tur ödemesi alındı mı?'}
+        </div>
+        <div class="pay-toggle ${t.commission_received?'active-com':''}" onclick="togglePayment(${t.id},'commission_received')">
+          <span class="dot"></span> ${t.commission_received?'✓ Komisyon alındı':'Komisyon alındı mı?'}
+        </div>
+      </div>
+    </div>`;
+}
+
+
+// TOURS VIEW FILTER
+function setToursView(view){
+  toursView=view;
+  ['all','month','year'].forEach(v=>{
+    const el=document.getElementById('tours-view-'+v);
+    if(el)el.className='tab'+(v===view?' active':'');
+  });
+  renderTours();
+}
+
+// RENDER TOURS
+function renderTours(){
+  document.getElementById('st-tours').textContent=myTours.length;
+  const bd=new Set();myTours.forEach(t=>getDates(t).forEach(d=>bd.add(d)));
+  document.getElementById('st-days').textContent=bd.size;
+  const todayDateStr=today.toISOString().slice(0,10);
+  const remaining=new Set([...bd].filter(d=>d>=todayDateStr));
+  document.getElementById('st-remaining').textContent=remaining.size;
+  const el=document.getElementById('tours-list');
+  const nowStr=today.toISOString().slice(0,10);
+  const curMonth=nowStr.slice(0,7);
+  const curYear=String(today.getFullYear());
+  const visibleTours=myTours.filter(t=>{
+    if(toursView==='month')return t.start.slice(0,7)===curMonth||t.end.slice(0,7)===curMonth;
+    if(toursView==='year')return t.start.startsWith(curYear)||t.end.startsWith(curYear);
+    return true;
+  });
+  if(visibleTours.length===0){el.innerHTML='<div class="empty-msg">Bu dönemde tur yok.</div>';return;}
+  el.innerHTML='';
+  visibleTours.slice().reverse().forEach(t=>{
+    const wrap=document.createElement('div');wrap.className='tour-item';
+    wrap.innerHTML=`
+    <div class="tour-item-header">
+      <div class="tour-color-bar" style="background:${t.color}"></div>
+      <div class="tour-info">
+        <span class="tour-name">${t.name}</span>
+        <span class="tour-meta">${fmtDate(parseDate(t.start))} → ${fmtDate(parseDate(t.end))}</span>
+        ${t.pax?`<span class="tour-meta">${t.pax} kişi</span>`:''}
+        ${t.price?`<span class="tour-meta">${t.price} ${t.currency}</span>`:''}
+        ${t.location?`<span class="tour-content">${t.location}</span>`:''}
+        ${t.notes?`<span class="tour-meta">${t.notes}</span>`:''}
+      </div>
+      <div class="item-actions">
+        <button class="edit-btn" onclick="openEditModal(${t.id})">✏️</button>
+        <button class="del-btn" onclick="deleteTour(${t.id})">×</button>
+      </div>
+    </div>
+    <div class="payment-bar">
+      <div class="pay-toggle ${t.payment_received?'active-pay':''}" onclick="togglePayment(${t.id},'payment_received')">
+        <span class="dot"></span> ${t.payment_received?'✓ Tur ödemesi alındı':'Tur ödemesi alındı mı?'}
+      </div>
+
+      <div class="pay-toggle ${t.commission_received?'active-com':''}" onclick="togglePayment(${t.id},'commission_received')">
+        <span class="dot"></span> ${t.commission_received?'✓ Komisyon alındı':'Komisyon alındı mı?'}
+      </div>
+    </div>`;
+    el.appendChild(wrap);
+  });
+}
+
+// RENDER TIPS
+function renderTips(){
+  const el=document.getElementById('tips-list');
+  if(myTips.length===0){el.innerHTML='<div class="empty-msg">Henüz bahşiş eklenmemiş.</div>';return;}
+  el.innerHTML='';
+  myTips.forEach(t=>{
+    const div=document.createElement('div');div.className='income-item';
+    div.innerHTML=`<div class="income-dot" style="background:#9333ea"></div>
+    <div class="income-info">
+      <span class="income-amount" style="color:#9333ea">+${fmtAmt(t.amount,t.currency)}</span>
+      <span class="income-meta">${t.date}</span>
+      ${t.tour_name?`<span class="income-tour">${t.tour_name}</span>`:''}
+      ${t.note?`<span class="income-meta">${t.note}</span>`:''}
+    </div>
+    <button class="del-btn" onclick="deleteTip(${t.id})">×</button>`;
+    el.appendChild(div);
+  });
+}
+
+// RENDER COMMISSIONS
+function renderCommissions(){
+  const el=document.getElementById('commissions-list');
+  if(myCommissions.length===0){el.innerHTML='<div class="empty-msg">Henüz komisyon eklenmemiş.</div>';return;}
+  el.innerHTML='';
+  myCommissions.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='income-item';
+    div.id='com-item-'+c.id;
+    div.style.flexDirection='column';
+    div.style.gap='8px';
+    div.innerHTML=`
+      <div style="display:flex;align-items:flex-start;gap:10px;width:100%">
+        <div class="income-dot" style="background:#ea580c;margin-top:3px"></div>
+        <div class="income-info">
+          <span class="income-amount" style="color:#ea580c">+${fmtAmt(c.amount,c.currency)}</span>
+          <span class="income-meta">${c.date}</span>
+          ${c.tour_name?`<span class="income-tour">${c.tour_name}</span>`:''}
+          ${c.source?`<span class="income-meta">📍 ${c.source}</span>`:''}
+          ${c.note?`<span class="income-meta">${c.note}</span>`:''}
+        </div>
+        <button class="del-btn" style="flex-shrink:0" onclick="deleteCommission(${c.id})">×</button>
+      </div>
+      <div style="padding-left:20px">
+        <div class="pay-toggle ${c.received?'active-com':''}" onclick="toggleCommissionReceived(${c.id})">
+          <span class="dot"></span> ${c.received?'✓ Komisyon alındı':'Komisyon alındı mı?'}
+        </div>
+      </div>`;
+    el.appendChild(div);
+  });
+}
+
+async function toggleCommissionReceived(id){
+  const c=myCommissions.find(x=>x.id===id);if(!c)return;
+  const newVal=!c.received;
+  const {error}=await sb.from('commissions').update({received:newVal}).eq('id',id).eq('user_id',currentUser.id);
+  if(error){showStatus('Hata: '+error.message,'err');return;}
+  c.received=newVal;
+  renderCommissions();
+  renderSummary();
+}
+
+// RENDER SUMMARY
+function renderSummary(){
+  // Year filter — must be defined FIRST
+  const yearFilter=(dateStr)=>showAllYears||String(dateStr).startsWith(String(selectedYear));
+  const filteredTours=myTours.filter(t=>yearFilter(t.start));
+  cachedFilteredTours=filteredTours;
+  const filteredTips=myTips.filter(t=>yearFilter(t.date));
+  const filteredComs=myCommissions.filter(c=>yearFilter(c.date));
+
+  // Currency helpers
+  function toTRY(amount,cur){
+    if(!amount||amount===0)return 0;
+    if(cur==='TRY')return amount;
+    if(exchangeRates[cur+'_TRY'])return amount*exchangeRates[cur+'_TRY'];
+    const toEur=exchangeRates['EUR_'+cur]?amount/exchangeRates['EUR_'+cur]:null;
+    if(toEur&&exchangeRates['EUR_TRY'])return toEur*exchangeRates['EUR_TRY'];
+    return null;
+  }
+  function totalInTRY(obj){
+    let sum=0,hasRate=false;
+    Object.entries(obj).forEach(([cur,amt])=>{const t=toTRY(amt,cur);if(t!==null){sum+=t;hasRate=true;}});
+    return hasRate?sum:null;
+  }
+  const tryFmt=(v)=>v!==null?'<br><span style="font-size:11px;opacity:0.7">≈ '+Math.round(v).toLocaleString('tr-TR')+' ₺</span>':'';
+
+  // Totals
+  const allCur=[...new Set([...filteredTips.map(t=>t.currency),...filteredComs.map(c=>c.currency),...filteredTours.map(t=>t.currency)])];
+  const tipsByCur={},comByCur={},tourByCur={};
+  filteredTips.forEach(t=>{tipsByCur[t.currency]=(tipsByCur[t.currency]||0)+parseFloat(t.amount);});
+  filteredComs.forEach(c=>{comByCur[c.currency]=(comByCur[c.currency]||0)+parseFloat(c.amount);});
+  filteredTours.filter(t=>t.payment_received&&t.price>0).forEach(t=>{tourByCur[t.currency]=(tourByCur[t.currency]||0)+parseFloat(t.price);});
+
+  const fmtByCur=(obj)=>{const lines=allCur.filter(c=>obj[c]).map(c=>`${obj[c].toFixed(2)} ${c}`);return lines.length?lines.join('<br>'):'—';};
+  const totalByCur={};
+  allCur.forEach(c=>{const v=(tipsByCur[c]||0)+(comByCur[c]||0)+(tourByCur[c]||0);if(v>0)totalByCur[c]=v;});
+
+  const tourTRY=totalInTRY(tourByCur);
+  const tipTRY=totalInTRY(tipsByCur);
+  const comTRY=totalInTRY(comByCur);
+  const allTRY=(tourTRY!==null||tipTRY!==null||comTRY!==null)?(tourTRY||0)+(tipTRY||0)+(comTRY||0):null;
+
+  const pendingPay=filteredTours.filter(t=>!t.payment_received&&t.price>0).length;
+  const pendingCom=myCommissions.filter(c=>!c.received).length;
+
+  const statsEl=document.getElementById('summary-stats');
+  if(!statsEl)return;
+  statsEl.innerHTML=`
+  <div class="stats-4">
+    <div class="stat-card green"><div class="stat-label">Tur Ödemeleri</div><div class="stat-val">${fmtByCur(tourByCur)}${tryFmt(tourTRY)}</div></div>
+    <div class="stat-card purple"><div class="stat-label">Bahşişler</div><div class="stat-val">${fmtByCur(tipsByCur)}${tryFmt(tipTRY)}</div></div>
+    <div class="stat-card orange"><div class="stat-label">Komisyonlar</div><div class="stat-val">${fmtByCur(comByCur)}${tryFmt(comTRY)}</div></div>
+    <div class="stat-card blue"><div class="stat-label">Toplam Kazanç</div><div class="stat-val">${fmtByCur(totalByCur)}${tryFmt(allTRY)}</div></div>
+  </div>
+  <div class="stats-4" style="margin-top:0">
+    <div class="stat-card ${pendingPay>0?'red':'default'} clickable" onclick="showPendingModal('pay')"><div class="stat-label">Bekleyen Ödeme</div><div class="stat-val">${pendingPay} tur</div><div style="font-size:10px;margin-top:4px;opacity:0.6">detay için tıkla</div></div>
+    <div class="stat-card ${pendingCom>0?'red':'default'} clickable" onclick="showPendingModal('com')"><div class="stat-label">Bekleyen Komisyon</div><div class="stat-val">${pendingCom} tur</div><div style="font-size:10px;margin-top:4px;opacity:0.6">detay için tıkla</div></div>
+    <div class="stat-card default"><div class="stat-label">Toplam Tur</div><div class="stat-val">${filteredTours.length}</div></div>
+  </div>`;
+
+  // Monthly breakdown
+  const months=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  const monthData={};
+  const addToMonth=(k,bucket,cur,amt)=>{
+    if(!monthData[k])monthData[k]={tip:{},com:{},pay:{},tours:0,workDays:new Set()};
+    monthData[k][bucket][cur]=(monthData[k][bucket][cur]||0)+parseFloat(amt);
+  };
+  filteredTips.forEach(t=>addToMonth(t.date.slice(0,7),'tip',t.currency,t.amount));
+  filteredComs.forEach(c=>addToMonth(c.date.slice(0,7),'com',c.currency,c.amount));
+  filteredTours.forEach(t=>{
+    const k=t.start.slice(0,7);
+    if(!monthData[k])monthData[k]={tip:{},com:{},pay:{},tours:0,workDays:new Set()};
+    monthData[k].tours++;
+    getDates(t).forEach(d=>monthData[k].workDays.add(d));
+    if(t.payment_received&&t.price>0)addToMonth(k,'pay',t.currency,t.price);
+  });
+
+  const el=document.getElementById('monthly-list');
+  const keys=Object.keys(monthData).sort().reverse();
+  if(!keys.length){el.innerHTML='<div class="empty-msg">Henüz veri yok.</div>';return;}
+  el.innerHTML='';
+  keys.forEach(k=>{
+    const d=monthData[k];
+    const [yr,mo]=k.split('-');
+    const title=months[parseInt(mo)-1]+' '+yr;
+    const allC=[...new Set([...Object.keys(d.tip),...Object.keys(d.com),...Object.keys(d.pay)])];
+    const fmt=(obj)=>allC.filter(c=>obj[c]).map(c=>obj[c].toFixed(2)+' '+c).join(', ')||'—';
+    const totByCur={};allC.forEach(c=>{const v=(d.tip[c]||0)+(d.com[c]||0)+(d.pay[c]||0);if(v)totByCur[c]=v;});
+    const totStr=Object.entries(totByCur).map(([c,v])=>v.toFixed(2)+' '+c).join(', ')||'—';
+    const workDayCount=d.workDays?d.workDays.size:0;
+    const tryTotal=(()=>{let s=0,ok=false;allC.forEach(c=>{const t=toTRY(totByCur[c],c);if(t!==null){s+=t;ok=true;}});return ok?'<span style="opacity:0.6;font-weight:400"> ≈ '+Math.round(s).toLocaleString('tr-TR')+' ₺</span>':''})();
+    const card=document.createElement('div');card.className='month-card';
+    card.innerHTML=`
+    <div class="month-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>${title}</span>
+      <span style="font-size:12px;color:var(--text2);font-weight:400">${d.tours} tur · ${workDayCount} gün</span>
+    </div>
+    <div class="month-grid">
+      <div class="month-stat"><div class="month-stat-label">Tur Ödemesi</div><div class="month-stat-val" style="color:var(--green)">${fmt(d.pay)}</div></div>
+      <div class="month-stat"><div class="month-stat-label">Bahşiş</div><div class="month-stat-val" style="color:var(--purple)">${fmt(d.tip)}</div></div>
+      <div class="month-stat"><div class="month-stat-label">Komisyon</div><div class="month-stat-val" style="color:var(--orange)">${fmt(d.com)}</div></div>
+    </div>
+    <div style="text-align:right;font-size:12px;font-weight:600;color:var(--blue);margin-top:8px">Toplam: ${totStr}${tryTotal}</div>`;
+    el.appendChild(card);
+  });
+}
+
+
+function render(){renderCalendar();renderTours();renderTips();renderCommissions();renderSummary();}
+
+
+// ── CURRENCY ─────────────────────────────────────────
+let exchangeRates={};
+
+async function loadCurrency(){
+  const grid=document.getElementById('currency-grid');
+  const upd=document.getElementById('currency-updated');
+  if(!grid)return;
+  try{
+    const res=await fetch('https://api.frankfurter.app/latest?from=EUR&to=TRY,USD,GBP');
+    const data=await res.json();
+    // Also get TRY base
+    const res2=await fetch('https://api.frankfurter.app/latest?from=USD&to=TRY,EUR,GBP');
+    const data2=await res2.json();
+    exchangeRates={
+      'EUR_TRY':data.rates.TRY,
+      'EUR_USD':data.rates.USD,
+      'EUR_GBP':data.rates.GBP,
+      'USD_TRY':data2.rates.TRY,
+      'USD_EUR':data2.rates.EUR,
+      'GBP_TRY':(data.rates.TRY/data.rates.GBP),
+    };
+    const pairs=[
+      ['EUR','TRY',exchangeRates['EUR_TRY']],
+      ['USD','TRY',exchangeRates['USD_TRY']],
+      ['GBP','TRY',exchangeRates['GBP_TRY']],
+      ['EUR','USD',exchangeRates['EUR_USD']],
+    ];
+    grid.innerHTML=pairs.map(([f,t,r])=>`
+      <div class="currency-row">
+        <span class="currency-pair">${f} → ${t}</span>
+        <span class="currency-rate">${r.toFixed(2)}</span>
+      </div>`).join('');
+    if(upd)upd.textContent='Son güncelleme: '+new Date().toLocaleTimeString('tr-TR');
+    updateConversion();
+  }catch(e){
+    if(grid)grid.innerHTML='<div class="weather-loading">Kurlar alınamadı</div>';
+  }
+}
+
+function updateConversion(){
+  const amount=parseFloat(document.getElementById('conv-amount')?.value)||0;
+  const from=document.getElementById('conv-from')?.value;
+  const to=document.getElementById('conv-to')?.value;
+  const result=document.getElementById('conv-result');
+  if(!result)return;
+  if(from===to){result.textContent=amount.toFixed(2)+' '+to;return;}
+  const key=from+'_'+to;
+  const key2=to+'_'+from;
+  let rate=null;
+  if(exchangeRates[key])rate=exchangeRates[key];
+  else if(exchangeRates[key2])rate=1/exchangeRates[key2];
+  if(rate)result.textContent=(amount*rate).toFixed(2)+' '+to;
+  else result.textContent='—';
+}
+
+// Bind converter inputs
+document.addEventListener('DOMContentLoaded',()=>{
+  ['conv-amount','conv-from','conv-to'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',updateConversion);
+  });
+});
+
+
+// ── YEAR SELECTOR ────────────────────────────────────
+function changeYear(dir){
+  showAllYears=false;
+  selectedYear+=dir;
+  document.getElementById('year-label').textContent=selectedYear;
+  document.getElementById('year-all-btn').classList.remove('active');
+  renderSummary();
+}
+function toggleAllYears(){
+  showAllYears=!showAllYears;
+  const btn=document.getElementById('year-all-btn');
+  btn.classList.toggle('active',showAllYears);
+  document.getElementById('year-label').textContent=showAllYears?'Tümü':selectedYear;
+  renderSummary();
+}
+
+// ── PENDING MODAL ─────────────────────────────────────
+let pendingModalType='pay';
+
+function showPendingModal(type){
+  pendingModalType=type;
+  const isPay=type==='pay';
+  document.getElementById('pending-modal-title').textContent=isPay?'Bekleyen Ödemeler':'Bekleyen Komisyonlar';
+  const listEl=document.getElementById('pending-modal-list');
+  listEl.innerHTML='';
+
+  if(isPay){
+    const list=cachedFilteredTours.filter(t=>!t.payment_received&&t.price>0);
+    if(!list.length){listEl.innerHTML='<div class="empty-msg">Bekleyen ödeme yok! 🎉</div>';}
+    else list.forEach(t=>{
+      const div=document.createElement('div');div.className='pending-item';div.id='pending-item-'+t.id;
+      div.innerHTML=`
+        <div style="width:10px;height:10px;border-radius:50%;background:${t.color};flex-shrink:0;margin-top:2px"></div>
+        <div class="pending-item-info">
+          <div class="pending-item-name">${t.name}</div>
+          <div class="pending-item-meta">${fmtDate(parseDate(t.start))} → ${fmtDate(parseDate(t.end))}${t.pax?' · '+t.pax+' kişi':''}</div>
+        </div>
+        <div class="pending-item-price">${t.price} ${t.currency}</div>
+        <button class="pay-toggle" style="flex-shrink:0;height:auto;padding:5px 10px;font-size:11px" onclick="markTourPayment(${t.id},this)">✓ Alındı</button>`;
+      listEl.appendChild(div);
+    });
+  } else {
+    const list=myCommissions.filter(c=>!c.received);
+    if(!list.length){listEl.innerHTML='<div class="empty-msg">Bekleyen komisyon yok! 🎉</div>';}
+    else list.forEach(c=>{
+      const div=document.createElement('div');div.className='pending-item';div.id='pending-item-com-'+c.id;
+      div.innerHTML=`
+        <div style="width:10px;height:10px;border-radius:50%;background:#ea580c;flex-shrink:0;margin-top:2px"></div>
+        <div class="pending-item-info">
+          <div class="pending-item-name">${c.tour_name||'Bağımsız komisyon'}</div>
+          <div class="pending-item-meta">${c.date}${c.source?' · '+c.source:''}${c.note?' · '+c.note:''}</div>
+        </div>
+        <div class="pending-item-price">${fmtAmt(c.amount,c.currency)}</div>
+        <button class="pay-toggle" style="flex-shrink:0;height:auto;padding:5px 10px;font-size:11px" onclick="markComReceived(${c.id},this)">✓ Alındı</button>`;
+      listEl.appendChild(div);
+    });
+  }
+  document.getElementById('pending-modal').style.display='flex';
+}
+
+async function markTourPayment(id,btn){
+  btn.disabled=true;btn.textContent='...';
+  const {error}=await sb.from('tours').update({payment_received:true}).eq('id',id).eq('user_id',currentUser.id);
+  if(error){btn.disabled=false;btn.textContent='✓ Alındı';showStatus('Hata: '+error.message,'err');return;}
+  const item=document.getElementById('pending-item-'+id);
+  if(item){item.style.opacity='0';item.style.transition='opacity 0.3s';setTimeout(()=>item.remove(),300);}
+  const t=myTours.find(x=>x.id===id);if(t)t.payment_received=true;
+  renderTours();renderSummary();
+  setTimeout(()=>{const l=document.getElementById('pending-modal-list');if(l&&!l.children.length)l.innerHTML='<div class="empty-msg">Bekleyen ödeme yok! 🎉</div>';},350);
+}
+
+async function markComReceived(id,btn){
+  btn.disabled=true;btn.textContent='...';
+  const {error}=await sb.from('commissions').update({received:true}).eq('id',id).eq('user_id',currentUser.id);
+  if(error){btn.disabled=false;btn.textContent='✓ Alındı';showStatus('Hata: '+error.message,'err');return;}
+  const item=document.getElementById('pending-item-com-'+id);
+  if(item){item.style.opacity='0';item.style.transition='opacity 0.3s';setTimeout(()=>item.remove(),300);}
+  const c=myCommissions.find(x=>x.id===id);if(c)c.received=true;
+  renderCommissions();renderSummary();
+  setTimeout(()=>{const l=document.getElementById('pending-modal-list');if(l&&!l.children.length)l.innerHTML='<div class="empty-msg">Bekleyen komisyon yok! 🎉</div>';},350);
+}
+
+// ── AUTO-FOCUS END DATE ───────────────────────────────
+function onStartDateChange(){
+  const startVal=document.getElementById('f-start').value;
+  if(startVal){
+    const endEl=document.getElementById('f-end');
+    endEl.min=startVal;
+    if(!endEl.value||endEl.value<startVal)endEl.value=startVal;
+    // Small delay so user finishes typing the year before focus shifts
+    setTimeout(()=>{
+      endEl.focus();
+      try{endEl.showPicker();}catch(e){}
+    },1000);
+  }
+}
+
+sb.auth.getSession().then(({data})=>{if(data.session){currentUser=data.session.user;loadProfile().then(()=>startApp());}});
+sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT')showScreen('auth');});
+</script>
+</body>
+</html>
